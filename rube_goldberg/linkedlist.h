@@ -19,7 +19,7 @@ typedef struct Node** DLList; // Typedef for doubly linked list
 
 //Creates a new Node and returns pointer to it. 
 
-struct Node** GetNewList();
+void InitList(Nodeptr* list_handle);
 
 Nodeptr GetNewNode(const char* lastname, const char* firstname, int age, const char* birthdate);
 

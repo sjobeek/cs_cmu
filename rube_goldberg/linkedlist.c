@@ -7,6 +7,14 @@
 #include "linkedlist.h"
 
 
+void InitList(Nodeptr* list_handle){
+    // Allocate node at head of list, then list itself
+    Nodeptr newNode
+        = (struct Node*)calloc(1, sizeof(struct Node));
+    newNode = NULL; //Indicate empty
+    *list_handle = newNode;
+}
+
 //Creates a new Node and returns pointer to it. 
 Nodeptr GetNewNode(const char* lastname, const char* firstname, int age, const char* birthdate) {
     struct Node* newNode
@@ -23,7 +31,7 @@ Nodeptr GetNewNode(const char* lastname, const char* firstname, int age, const c
 }
 
 //Inserts a Node at head of doubly linked list
-void InsertAtHead(struct Node** list_handle, Nodeptr newNode) {
+void InsertAtHead(Nodeptr* list_handle, Nodeptr newNode) {
     if(*list_handle == NULL) {
         // TODO: Free memory of null node
         *list_handle = newNode;
@@ -35,7 +43,7 @@ void InsertAtHead(struct Node** list_handle, Nodeptr newNode) {
 }
 
 //Inserts a Node at tail of Doubly linked list
-void InsertAtTail(struct Node** list_handle, Nodeptr newNode) {
+void InsertAtTail(Nodeptr* list_handle, Nodeptr newNode) {
     struct Node* temp = *list_handle;
     if(*list_handle == NULL) {
         *list_handle = newNode;
@@ -47,7 +55,7 @@ void InsertAtTail(struct Node** list_handle, Nodeptr newNode) {
 }
 
 //Prints all the elements in linked list in forward traversal order
-void PrintList(struct Node** list_handle) {
+void PrintList(Nodeptr* list_handle) {
     struct Node* temp = *list_handle;
     printf("Forward: \n");
     while(temp != NULL) {
@@ -61,7 +69,7 @@ void PrintList(struct Node** list_handle) {
 }
 
 //Prints all elements in linked list in reverse traversal order. 
-void ReversePrintList(struct Node** list_handle) {
+void ReversePrintList(Nodeptr* list_handle) {
     struct Node* temp = *list_handle;
     if(temp == NULL) return; // empty list, exit
     // Going to last Node
