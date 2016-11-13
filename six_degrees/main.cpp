@@ -1,0 +1,136 @@
+#include <iostream>
+#include <fstream>
+#include "GraphActors.h"
+
+using namespace std;
+
+const int DEBUG = 1;
+
+string trim(string input);
+int processLineForVertexEdge (GraphActors*&, string);
+int acceptUserInputOfActors(GraphActors*&);
+
+int main() {
+
+    string line, fileName = "";
+    GraphActors *ga = new GraphActors();
+
+    ifstream myFile;
+    if (fileName == ""){
+        //myFile.open("MovieDataUnitTests.txt");
+        //myFile.open("data/MovieData.txt");
+        myFile.open("data/MovieData_JimCarreyJenniferAnistonBenStiller.txt");
+    }else {
+        myFile.open(fileName);
+    }
+
+    // Loading Vertices and Edges into the application
+    if (myFile.is_open()) {
+        while (getline(myFile, line)) {
+            //(edge, vertex) = processLine(line);
+            processLineForVertexEdge (ga, line);
+        }
+    }
+
+    cout << "The graph of connections has been loaded successfully." << endl;
+
+    (*ga).printXNumOfKeys((*ga).getLength());
+
+    // Interact with user to find degrees of separation between two actors
+
+    bool userWillContinue = true;
+    string shouldExit = "";
+    while (userWillContinue){
+        cout << "If you would like to exit, please type 'exit' and press enter otherwise press enter" << endl;
+        getline (cin, shouldExit);
+        if (!shouldExit.compare("exit")){
+            userWillContinue = false;
+        }else {
+            acceptUserInputOfActors(ga);
+        }
+    }
+
+    return 0;
+}
+
+int acceptUserInputOfActors(GraphActors*& ga){
+    cout << "You will be prompted for two actors to find their degrees of separation, enjoy" << endl;
+
+    string actorOne = "", actorTwo = "";
+    while (actorOne == ""){
+        cout << "What's the first actor's name?" << endl;
+        getline (cin, actorOne);
+        if (actorOne == ""){
+            cout << "Please don't leave the first actor's name empty" << endl;
+        }
+        else if (!(*ga).doesKeyExist(actorOne)){
+            cout << "The actor with name " << actorOne << " does not exist in this data set" << endl;
+            actorOne = "";
+        }
+    }
+    while (actorTwo == ""){
+        cout << "What's the second actor's name?" << endl;
+        getline (cin, actorTwo);
+        if (actorTwo == ""){
+            cout << "Please don't leave the second actor's name empty" << endl;
+        }
+        else if (!(*ga).doesKeyExist(actorTwo)){
+            cout << "The actor with name " << actorTwo << " does not exist in this data set" << endl;
+            actorTwo = "";
+        }
+    }
+};
+
+int processLineForVertexEdge (GraphActors*& ga, string line){
+    string title = "", actors = "";
+    std::vector<std::string> actorsToAdd;
+    int indexOfRating = line.find('('), indexOfActors = line.rfind('(');
+
+    if (indexOfActors != std::string::npos && indexOfRating != std::string::npos){
+        actors = line.substr(indexOfActors+1, line.length()-2);
+        title = line.substr(0, indexOfRating);
+        title = trim(title);
+        if (DEBUG){
+            cout << "Whole contents of line is " << line << endl;
+            cout << "Value of title is " << title << endl;
+            cout << "Value of actors is " << actors << endl;
+        }
+
+        string actorVertex = "";
+        int indexOfActorVertex =actors.find(',');
+        while (actors != ""){
+            if ( indexOfActorVertex != std::string::npos && indexOfActorVertex > 0){
+                if (DEBUG){cout << "Index of Actor Vertex " << indexOfActorVertex << endl;}
+                actorVertex = actors.substr(0,indexOfActorVertex);
+                actorVertex = trim(actorVertex);
+                if (DEBUG){cout << "current value of actor vertex is " << actorVertex << endl;}
+                actors = actors.substr(indexOfActorVertex+1, actors.length()-1);
+            } else if (actors.length() > 0) {
+                actorVertex = actors.substr(0,actors.length()-2);
+                actorVertex = trim(actorVertex);
+                if (DEBUG){cout << "current value of actor vertex is " << actorVertex << endl;}
+                actors = "";
+            } else {
+                actors = "";
+            }
+            actorsToAdd.push_back(actorVertex);
+            indexOfActorVertex =actors.find(',');
+        }
+        if (actorsToAdd.size() > 0){
+            ga->addActorConnection(actorsToAdd,title);
+        }   else{
+            cout << "No actors were parsed from " << actors << " with original line being " << line<< endl;
+        }
+    } else {
+        cout << "No title or actors processed from line with contents = " << line << endl;
+    }
+
+    return 0;
+}
+
+// Utility function to trim leading and trailing whitespace
+string trim(string input){
+    int newStartIndex = input.find_first_not_of(" \r\t\n"),newEndIndex = input.find_last_not_of(" )\r\t\n");
+
+    return input.substr(newStartIndex,newEndIndex-newStartIndex+1);
+}
