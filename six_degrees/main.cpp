@@ -85,9 +85,10 @@ int processLineForVertexEdge (GraphActors*& ga, string line){
     string title = "", actors = "";
     std::vector<std::string> actorsToAdd;
     int indexOfRating = line.find('('), indexOfActors = line.rfind('(');
+    int indexOfActorsClosingParen = line.rfind(')');
 
     if (indexOfActors != std::string::npos && indexOfRating != std::string::npos){
-        actors = line.substr(indexOfActors+1, line.length()-2);
+        actors = line.substr(indexOfActors+1, indexOfActorsClosingParen-indexOfActors-1);
         title = line.substr(0, indexOfRating);
         title = trim(title);
         if (DEBUG){
@@ -98,7 +99,7 @@ int processLineForVertexEdge (GraphActors*& ga, string line){
 
         string actorVertex = "";
         int indexOfActorVertex =actors.find(',');
-        while (actors != ""){
+        while (actors != ""){                            // (below) Handle case of missing first actor
             if ( indexOfActorVertex != std::string::npos && indexOfActorVertex > 0){
                 if (DEBUG){cout << "Index of Actor Vertex " << indexOfActorVertex << endl;}
                 actorVertex = actors.substr(0,indexOfActorVertex);
@@ -106,7 +107,7 @@ int processLineForVertexEdge (GraphActors*& ga, string line){
                 if (DEBUG){cout << "current value of actor vertex is " << actorVertex << endl;}
                 actors = actors.substr(indexOfActorVertex+1, actors.length()-1);
             } else if (actors.length() > 0) {
-                actorVertex = actors.substr(0,actors.length()-2);
+                actorVertex = actors.substr(0,actors.length());
                 actorVertex = trim(actorVertex);
                 if (DEBUG){cout << "current value of actor vertex is " << actorVertex << endl;}
                 actors = "";
