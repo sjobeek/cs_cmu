@@ -40,9 +40,6 @@ public:
 private:
     std::queue<std::string> visitedQueue;
     std::map<std::string, LinkedList> ActorMap;
-    std::vector<relationship> bfs_recursion(std::string actorStart, std::string actorGoal,
-                                           std::vector<relationship> cumulativePath, 
-                                           std::set<std::string> visitedActors);
 };
 
 
