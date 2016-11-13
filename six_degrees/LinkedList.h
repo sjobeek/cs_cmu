@@ -28,6 +28,7 @@ class LinkedList {
         ~LinkedList();      //  Deconstructor
         void insertEnd(std::string actorKey, std::string movieTitle);       //  Append input person to end of Linked List
         std::string getFirstConnection();
+        relationship getFirstRelationship();
 //        void insertSorted(Person input);    //  Find insertion point for the input person within the Linked List
         void displayList();                 //  Display all contents of the Linked List
         void quickSort();                   //  Implement recursive quicksort

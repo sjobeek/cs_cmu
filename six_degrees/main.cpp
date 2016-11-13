@@ -4,11 +4,15 @@
 
 using namespace std;
 
-const int DEBUG = 1;
+const int DEBUG = 0;
 
 string trim(string input);
 int processLineForVertexEdge (GraphActors*&, string);
-int acceptUserInputOfActors(GraphActors*&);
+std::string acceptUserInputOfActor1(GraphActors*&);
+std::string acceptUserInputOfActor2(GraphActors*&);
+
+void printSearchResult(string actorOne,string actorGoal,
+                       std::vector<relationship> full_path);
 
 int main() {
 
@@ -18,8 +22,8 @@ int main() {
     ifstream myFile;
     if (fileName == ""){
         //myFile.open("MovieDataUnitTests.txt");
-        //myFile.open("data/MovieData.txt");
-        myFile.open("data/MovieData_JimCarreyJenniferAnistonBenStiller.txt");
+        myFile.open("data/MovieData.txt");
+        //myFile.open("data/MovieData_JimCarreyJenniferAnistonBenStiller.txt");
     }else {
         myFile.open(fileName);
     }
@@ -32,31 +36,60 @@ int main() {
         }
     }
 
-    cout << "The graph of connections has been loaded successfully." << endl;
+    //cout << "The graph of connections has been loaded successfully." << endl;
 
-    (*ga).printXNumOfKeys((*ga).getLength());
+    //(*ga).printXNumOfKeys((*ga).getLength());
+
+
+/*
+    // For testing only, find connections between Jim Carrey and Ben Stiller
+    // (through Jennifer Aniston)
+    cout << endl << endl;
+    string actorOne = "Owen Wilson", actorTwo = "Justin Cooper";
+    //string actorOne = "Ben Stiller", actorTwo = "Jim Carrey";
+
+    std::vector<relationship> full_path = (*ga).bfs(actorOne, actorTwo);
+
+    if(full_path.size() > 0)
+        printSearchResult(actorOne, actorTwo, full_path);
+*/
 
     // Interact with user to find degrees of separation between two actors
-
     bool userWillContinue = true;
     string shouldExit = "";
     while (userWillContinue){
-        cout << "If you would like to exit, please type 'exit' and press enter otherwise press enter" << endl;
+        cout << "If you would like to exit, please type 'exit'. Otherwise, press enter to continue." << endl;
         getline (cin, shouldExit);
         if (!shouldExit.compare("exit")){
             userWillContinue = false;
         }else {
-            acceptUserInputOfActors(ga);
+            cout << "You will be prompted for two actors to find their degrees of separation, enjoy" << endl;
+            string actorOne = acceptUserInputOfActor1(ga);
+            string actorTwo = acceptUserInputOfActor2(ga);
+            std::vector<relationship> full_path = (*ga).bfs(actorOne, actorTwo);
+            if(full_path.size() > 0)
+                printSearchResult(actorOne, actorTwo, full_path);
         }
     }
 
     return 0;
 }
 
-int acceptUserInputOfActors(GraphActors*& ga){
-    cout << "You will be prompted for two actors to find their degrees of separation, enjoy" << endl;
+void printSearchResult(string actorOne,string actorGoal,
+                       std::vector<relationship> full_path){
+    cout << endl << actorOne << " -> " << actorGoal << ": " <<
+            full_path.size() - 1 << " Degrees of Separation" << endl;
 
-    string actorOne = "", actorTwo = "";
+    std::string last_actor = actorOne; 
+    for (relationship rel : full_path){
+        cout << rel.movieTitle << " : "  << last_actor << "; " << rel.actorKey  << endl;
+        last_actor = rel.actorKey;
+    }
+}
+
+
+std::string acceptUserInputOfActor1(GraphActors*& ga){
+    string actorOne = "";
     while (actorOne == ""){
         cout << "What's the first actor's name?" << endl;
         getline (cin, actorOne);
@@ -68,6 +101,11 @@ int acceptUserInputOfActors(GraphActors*& ga){
             actorOne = "";
         }
     }
+    return actorOne;
+}
+
+std::string acceptUserInputOfActor2(GraphActors*& ga){
+    string actorTwo = "";
     while (actorTwo == ""){
         cout << "What's the second actor's name?" << endl;
         getline (cin, actorTwo);
@@ -79,7 +117,8 @@ int acceptUserInputOfActors(GraphActors*& ga){
             actorTwo = "";
         }
     }
-};
+    return actorTwo;
+}
 
 int processLineForVertexEdge (GraphActors*& ga, string line){
     string title = "", actors = "";
@@ -114,7 +153,8 @@ int processLineForVertexEdge (GraphActors*& ga, string line){
             } else {
                 actors = "";
             }
-            actorsToAdd.push_back(actorVertex);
+            if (actorVertex != "Jr.")  // Avoid problematic 'Someone, Jr.' name
+                actorsToAdd.push_back(actorVertex);
             indexOfActorVertex =actors.find(',');
         }
         if (actorsToAdd.size() > 0){

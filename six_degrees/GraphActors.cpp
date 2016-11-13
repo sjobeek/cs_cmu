@@ -2,6 +2,7 @@
 // Created by mikecranwill on 11/12/2016.
 //
 
+#include "LinkedList.h"
 #include "GraphActors.h"
 #include <iostream>
 
@@ -48,12 +49,80 @@ void GraphActors::addActorConnection(std::vector<std::string>& actorsCollection,
 }
 
 
-std::string GraphActors::bfs(std::string actorOne, std::string actorTwo){
+std::vector<relationship> GraphActors::bfs(std::string actorStart, std::string actorGoal){
+    
+    std::set<std::string> visitedActors;
+    visitedActors.insert(actorStart);
+
+    std::vector<relationship> initial_path;
+    initial_path.push_back(ActorMap[actorStart].getFirstRelationship());
+    
+    std::queue<vector<relationship>> pathQueue;
+    pathQueue.push(initial_path);
+
+
+    while(!pathQueue.empty()){
+
+        std::vector<relationship> path = pathQueue.front();
+        if (path.size() >= 6){
+            std::cout << "Degrees of Seperation more than 6 !! Search Abandoned" << std::endl;
+            std::vector<relationship> empty_path;
+            return empty_path;
+        }
+        pathQueue.pop();
+
+        std::vector<relationship> connections = ActorMap[path.back().actorKey].getAllConnections();
+        for(relationship connection : connections){
+            // Ignore actors who have already been visited
+            if (visitedActors.count(connection.actorKey) == 0){
+                visitedActors.insert(connection.actorKey);  
+                std::vector<relationship> new_path(path);  
+                new_path.push_back(connection);   // Add new person/movie to path
+                pathQueue.push(new_path);         // Add extended path to queue
+                if (connection.actorKey == actorGoal)
+                    return new_path; // Success!
+            }
+        }
+
+    }
+}
+
+std::vector<relationship> GraphActors::bfs_recursion(std::string actorStart, std::string actorGoal,
+                                           std::vector<relationship> cumulativePath, 
+                                           std::set<std::string> visitedActors){
+
+
+    visitedActors.insert(actorStart);
+
+    if (actorStart == actorGoal){ // Success!
+        return cumulativePath;
+    } 
+
+    if (cumulativePath.size() > 6){
+        std::cout << "Too Deep!!!!";
+        std::vector<relationship> empty_vec;
+        return empty_vec;
+    }
+    
+    std::vector<relationship> connections = ActorMap[actorStart].getAllConnections();
+    for(relationship connection : connections){
+        if (visitedActors.count(connection.actorKey) == 0){ // If actor not already visited
+            cumulativePath.push_back(connection);
+            std::vector<relationship> path = bfs_recursion(connection.actorKey, actorGoal,
+                                                           cumulativePath, visitedActors);
+            if (path.size() > 0)
+                return path;
+        }
+    }
+    std::vector<relationship> empty_vec;
+    return empty_vec;
+
+    /*
     std::queue<visitedPair> visitedQueue;
     std::map<std::string, bool> visitedMap;
     for (std::map<std::string,LinkedList>::iterator it=ActorMap.begin(); it!=ActorMap.end(); ++it){
         //visitedPair vp(it->first,false);
-        visitedMap.insert(std::pair<std::string,bool>(it->first,false));
+        visitedMap[it->first] = false;
         //visitedQueue.push(vp);
     }
 
@@ -61,13 +130,30 @@ std::string GraphActors::bfs(std::string actorOne, std::string actorTwo){
     visitedPair vp(actorOne,0);
     visitedQueue.push(vp);
 
-    while(visitedQueue.empty()){
+
+    while(!visitedQueue.empty()){
         visitedPair tempPair = visitedQueue.front();
+        if (tempPair.distance >= 6){
+            std::cout << "Max depthreached! No solution";
+            break;
+        }
         visitedQueue.pop();
-        ActorMap.at(tempPair.key).getFirstConnection();
+        std::cout << "Key " << tempPair.key << "   Depth " << tempPair.distance << std::endl;
+        std::vector<relationship> connections = ActorMap[tempPair.key].getAllConnections();
+        for(relationship connection : connections){
+            if (!visitedMap[connection.actorKey]){
+                visitedMap[connection.actorKey] = true;
+                visitedPair vp_i(connection.actorKey, tempPair.distance + 1);
+                visitedQueue.push(vp_i);
+                std::cout << connection.actorKey << "  ";
+                if (connection.actorKey == actorTwo)
+                    std::cout << "FOUND CONNECTION   Depth: " << tempPair.distance + 1;
+
+            }
+        }
     }
 
-    return "";
+    return ""; */
 }
 
 //  Utility function to get the number of elements in GraphActors elements

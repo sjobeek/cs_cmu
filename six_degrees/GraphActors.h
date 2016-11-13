@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <queue>
+#include <set>
 #include "LinkedList.h"
 
 struct visitedPair {
@@ -33,10 +34,15 @@ public:
     //  Utility function to detect whether the key has been inserted already
     bool doesKeyExist(std::string key);
 
-    std::string bfs(std::string actorOne, std::string actorTwo);
+//    std::string bfs(std::string actorOne, std::string actorTwo);
+    std::vector<relationship> bfs(std::string actorStart, std::string actorGoal);
+
 private:
     std::queue<std::string> visitedQueue;
     std::map<std::string, LinkedList> ActorMap;
+    std::vector<relationship> bfs_recursion(std::string actorStart, std::string actorGoal,
+                                           std::vector<relationship> cumulativePath, 
+                                           std::set<std::string> visitedActors);
 };
 
 

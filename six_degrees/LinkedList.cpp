@@ -45,6 +45,13 @@ std::string LinkedList::getFirstConnection(){
         cur=cur->next;
     }
     return output;
+
+}
+
+relationship LinkedList::getFirstRelationship(){
+    LLNode *cur = head;
+    relationship r(cur->actorKey,cur->movieTitle);
+    return r;
 }
 
 std::vector<relationship> LinkedList::getAllConnections(){
@@ -53,6 +60,7 @@ std::vector<relationship> LinkedList::getAllConnections(){
     while (cur != nullptr){
         relationship r(cur->actorKey,cur->movieTitle);
         connections.push_back(r);
+        cur=cur->next;
     }
 
     return connections;
