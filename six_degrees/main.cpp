@@ -8,8 +8,7 @@ const int DEBUG = 0;
 
 string trim(string input);
 int processLineForVertexEdge (GraphActors*&, string);
-std::string acceptUserInputOfActor1(GraphActors*&);
-std::string acceptUserInputOfActor2(GraphActors*&);
+std::string acceptUserInputOfActor(GraphActors*&, std::string);
 
 void printSearchResult(string actorOne,string actorGoal,
                        std::vector<relationship> full_path);
@@ -22,7 +21,7 @@ int main() {
     ifstream myFile;
     if (fileName == ""){
         //myFile.open("MovieDataUnitTests.txt");
-        //myFile.open("C:\\Users\\mikej\\Documents\\CMUGradSchool\\2016_FALL_DATA_STRUCTS\\A5\\six_degrees\\data\\MovieData.txt");
+        //myFile.open("C:\\Users\\mikej\\Documents\\CMUGradSchool\\2016_FALL_DATA_STRUCTS\\A5\\cs_cmu\\six_degrees\\data\\MovieData.txt");
         myFile.open("data/MovieData.txt");
         //myFile.open("data/MovieData_JimCarreyJenniferAnistonBenStiller.txt");
     }else {
@@ -44,9 +43,9 @@ int main() {
         return 0;
     }
 
-    //cout << "The graph of connections has been loaded successfully." << endl;
-    cout << "What is the length of graph? It is " << (*ga).getLength() << endl;
-    //(*ga).printXNumOfKeys((*ga).getLength());
+    //  cout << "The graph of connections has been loaded successfully." << endl;
+    //  cout << "What is the length of graph? It is " << (*ga).getLength() << endl;
+    //  (*ga).printXNumOfKeys((*ga).getLength());
 
 
 /*
@@ -72,8 +71,8 @@ int main() {
             userWillContinue = false;
         }else {
             cout << "You will be prompted for two actors to find their degrees of separation, enjoy" << endl;
-            string actorOne = acceptUserInputOfActor1(ga);
-            string actorTwo = acceptUserInputOfActor2(ga);
+            string actorOne = acceptUserInputOfActor(ga, "first");
+            string actorTwo = acceptUserInputOfActor(ga, "second");
             std::vector<relationship> full_path = (*ga).bfs(actorOne, actorTwo);
             if(full_path.size() > 0)
                 printSearchResult(actorOne, actorTwo, full_path);
@@ -95,38 +94,22 @@ void printSearchResult(string actorOne,string actorGoal,
     }
 }
 
-
-std::string acceptUserInputOfActor1(GraphActors*& ga){
-    string actorOne = "";
-    while (actorOne == ""){
-        cout << "What's the first actor's name?" << endl;
-        getline (cin, actorOne);
-        if (actorOne == ""){
-            cout << "Please don't leave the first actor's name empty" << endl;
+std::string acceptUserInputOfActor(GraphActors*& ga, std::string firstOrSecond){
+    string tempActor = "";
+    while (tempActor == ""){
+        cout << "What's the " << firstOrSecond << " actor's name?" << endl;
+        getline (cin, tempActor);
+        if (tempActor == ""){
+            cout << "Please don't leave the " << firstOrSecond << " actor's name empty" << endl;
         }
-        else if (!(*ga).doesKeyExist(actorOne)){
-            cout << "The actor with name " << actorOne << " does not exist in this data set" << endl;
-            actorOne = "";
-        }
-    }
-    return actorOne;
-}
-
-std::string acceptUserInputOfActor2(GraphActors*& ga){
-    string actorTwo = "";
-    while (actorTwo == ""){
-        cout << "What's the second actor's name?" << endl;
-        getline (cin, actorTwo);
-        if (actorTwo == ""){
-            cout << "Please don't leave the second actor's name empty" << endl;
-        }
-        else if (!(*ga).doesKeyExist(actorTwo)){
-            cout << "The actor with name " << actorTwo << " does not exist in this data set" << endl;
-            actorTwo = "";
+        else if (!(*ga).doesKeyExist(tempActor)){
+            cout << "The actor with name " << tempActor << " does not exist in this data set" << endl;
+            tempActor = "";
         }
     }
-    return actorTwo;
+    return tempActor;
 }
+
 
 int processLineForVertexEdge (GraphActors*& ga, string line){
     string title = "", actors = "";
