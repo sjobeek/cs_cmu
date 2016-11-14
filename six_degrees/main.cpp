@@ -22,6 +22,7 @@ int main() {
     ifstream myFile;
     if (fileName == ""){
         //myFile.open("MovieDataUnitTests.txt");
+        //myFile.open("C:\\Users\\mikej\\Documents\\CMUGradSchool\\2016_FALL_DATA_STRUCTS\\A5\\six_degrees\\data\\MovieData.txt");
         myFile.open("data/MovieData.txt");
         //myFile.open("data/MovieData_JimCarreyJenniferAnistonBenStiller.txt");
     }else {
@@ -34,10 +35,17 @@ int main() {
             //(edge, vertex) = processLine(line);
             processLineForVertexEdge (ga, line);
         }
+    } else {
+        if (fileName == ""){
+            cout << "The file data/MovieData.txt was not found in the current working directory." << endl;
+        }else {
+            cout << "The file " << fileName << " was not found in the current working directory." << endl;
+        }
+        return 0;
     }
 
     //cout << "The graph of connections has been loaded successfully." << endl;
-
+    cout << "What is the length of graph? It is " << (*ga).getLength() << endl;
     //(*ga).printXNumOfKeys((*ga).getLength());
 
 
