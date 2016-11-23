@@ -24,6 +24,7 @@ Benefits:
  1. Human readable data and metadata.
  1. Self-describing
  1. Supports non-ascii characters natively
+ 1. Easily extensible without breaking existing code (no dependency on order within each line / data packet)
 
 Downsides:
 
