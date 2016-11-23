@@ -31,16 +31,16 @@ Downsides:
  1. Lower performance than binary storage format.
  1. Less efficient use of space due to repeated keywords (compression would alleviate)
 
-#### First-line Metadata Example: (MUST be in a single line at top of file)
+#### First-line Metadata Example: (MUST be on a single line at top of file)
 ```JSON
 {"Hours": {"type": "integer", "description": "Integer data that represents the data sample time stamp hours."}, "Minutes": {"type": "integer", "description": "Integer data that represents the data sample time stamp minutes"}, "Seconds": {"type": "integer", "description": "Integer data that represents the data sample time stamp seconds."}, "Humidity": {"type": "number", "description": "Floating point data that represents the relative humidity"},"Temperature": {"type": "number", "description": "Floating point data that represents temperature in degrees Fahrenheit."}, "Pressure": {"type": "number", "description": "Floating point data that represents pressure in kilo-Pascals (kPa)."}}
 ```
-#### Data packet examples: (one line of data file per packet) 
+#### Data packet examples: (one line per packet) 
 ```JSON
-{"Hours": 13, "Minutes": 12, "Seconds": 22, "Humidity": 12.3,"Temperature": 94.4, "Pressure": 101.3}
-{"Hours": 13, "Minutes": 12, "Seconds": 23, "Humidity": 12.2,"Temperature": 94.5, "Pressure": 101.1}
-{"Hours": 13, "Minutes": 12, "Seconds": 24, "Humidity": 12.2,"Temperature": 94.2, "Pressure": 100.8}
-{"Hours": 13, "Minutes": 12, "Seconds": 25, "Humidity": 12.1,"Temperature": 94.3, "Pressure": 100.6}
+{"Hours": 13, "Minutes": 12, "Seconds": 22, "Humidity": 12.3, "Temperature": 94.4, "Pressure": 101.3}
+{"Hours": 13, "Minutes": 12, "Seconds": 23, "Humidity": 12.2, "Temperature": 94.5, "Pressure": 101.1}
+{"Hours": 13, "Minutes": 12, "Seconds": 24, "Humidity": 12.2, "Temperature": 94.2, "Pressure": 100.8}
+{"Hours": 13, "Minutes": 12, "Seconds": 25, "Humidity": 12.1, "Temperature": 94.3, "Pressure": 100.6}
 ```
 ### Describe how your design meets all of the functions above.
 
