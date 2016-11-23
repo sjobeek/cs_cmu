@@ -9,7 +9,7 @@
 
  1. Read data function that reads and fills buffers of data. Users will provide the start and stop time as well as the measurements of interest. The API will return buffers of data to the user. Note that if there is more data than can be reasonably packed into a single buffer, the API should signal the programmer in some way that there is more data to read.
 
-1. Support different streams than DataGen (always has time in current format)
+ 1. Support different streams than DataGen (always has time in current format)
 
 # Deliverables 
 ## API and Design Discussion
