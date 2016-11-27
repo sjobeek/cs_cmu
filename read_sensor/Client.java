@@ -21,6 +21,8 @@
  * Internal Methods: None
  *
  ******************************************************************************************************************/
+import com.sun.xml.internal.bind.v2.TODO;
+
 import java.io.*;
 import java.net.*;
 import java.nio.file.*;
@@ -67,12 +69,14 @@ class Measurements {
 
 class Client
 {
+    //  Structure to organize all of the Measurement objects
 	private static ArrayList<Measurements> listOfMeasures = new ArrayList<Measurements>();
+
 	public static void main(String args[]) throws Exception
 	{
-		int	portID;				// Server socket port
+		int	portID;		// Server socket port
 
-		// Here we check to see if there is a port number specified on the command line.
+		// Here we check to see if there is a port number specified on the command line and set server port accordingly.
 		if ( args.length > 0 )
 		{
 			try {
@@ -80,7 +84,6 @@ class Client
 				System.out.println( "Using port:: " + args[0] );
 				portID = new Integer( args[0] );
 			} // try
-
 			catch (NumberFormatException IOError)
 			{
 				// means port number provided on the command line is invalid
@@ -88,28 +91,21 @@ class Client
 				portID = 6789;
 				System.out.println( "\nSpecified port number on command line " + args[0] + " is invalid as port number." );
 				System.out.println( "\nDefault port number:: " + portID + " will be used." );
-
 			} // catch
-
 		} else {
-
 			// no port number specified, so we set the port number to 6789
 			portID = 6789;
 			System.out.println( "Using port:: " + portID );
-
-		} // server port
+		} // setting server port
 
 		//  Prompting user if they would like to refresh the local data and listen to the available DataGenerator
-		//BufferedReader UserInput = new BufferedReader( new InputStreamReader(System.in));
 		Scanner UserInput = new Scanner(System.in);
-		String response = null;
 
-		ArrayList<String> inputDataFiles = new ArrayList();
-		inputDataFiles = retrievePossibleDatasets();
+        //  Find all files that have measurement data stored in them
+		ArrayList<String> inputDataFiles = retrievePossibleDatasets();
 		System.out.println("Number of tracked datasets is " + inputDataFiles.size());
-
+        //  Load the data stored in local disk to application memory for processing
 		loadAllData(inputDataFiles);
-
 
 		while (true) {
 			//  Get the menu for what services are provided
@@ -122,14 +118,19 @@ class Client
 
 			char c = UserInput.next().charAt(0);
 
+            //  Option for gathering 5 minutes of data from the Data Generator
 			if (c == 'r') {
 				System.out.println("The data will be gathered if the source is available on the port " + portID);
 				String tempReturnElem = refreshDataSource();
 				System.out.println(tempReturnElem + " was successfully stored.");
+
+            //  Option for searching on a measurement type and value.
 			} else if (c == 'f') {
+                //  Initial value to distinguish the different measurement types
 				int searchType = Integer.MAX_VALUE;
 				System.out.println("What measurement would you like to search on?");
 				while (searchType == Integer.MAX_VALUE) {
+                    //  This is the default options for measurements of humidity, temperature, pressure
 					if (listOfMeasures.get(0).al.size() == 3) {
 						System.out.println("You're options will be 0: Humidity, 1: Temperature, 2: Pressure");
 						char fc = UserInput.next().charAt(0);
@@ -140,8 +141,13 @@ class Client
 						} else if (fc == '2') {
 							searchType = 2;
 						} else {
-							System.out.println("The ");
+							System.out.println("The type you entered was " + fc + " please use one of the following" +
+                                    " characters {0, 1, 2}");
 						}
+					//  If it is any option other than the default options, don't bother to do any mapping of numbers
+                    //  to the different options and instead rely on the user having knowledge of the changes that were
+                    //  made to the Data Generation server.  We enforce that the number entered is less than the overall
+                    // size but nothing else.
 					} else {
 						System.out.println("Please choose an index below the number of measurements we have, " +
 								"which is " + listOfMeasures.get(0).al.size() + ", please try again.");
@@ -154,20 +160,30 @@ class Client
 
 				//  What value would you like to search on?
 				System.out.println("What value would you like to search on?");
-				String value = UserInput.next();
+				//  Get the user's value after they press enter
+                String value = UserInput.next();
+                //  Convert the User's value to a float and read through the structure with for the search type with the
+                //  similar value
 				String retTimestampFirst = findFirstOccurrence(searchType, Float.parseFloat(value));
-				String retTimestampNext = findNextOccurrence(Integer.parseInt(retTimestampFirst.split("__")[1]), searchType, Float.parseFloat(value));
+                //  Convert the User's value to a float and read through the structure with for the search type with the
+                //  similar value.  This time we start at the index+1 we were able to find in findFirstOccurrence
+				String retTimestampNext = findNextOccurrence(Integer.parseInt(retTimestampFirst.split("__")[1]),
+                        searchType, Float.parseFloat(value));
 				System.out.println("The value: " + Float.parseFloat(value) + " for searchType: " + searchType + " was started at and then completed at "
 						+ retTimestampFirst.split("__")[0] + "_" + retTimestampNext);
+			//  Allows gaining a quick view of all the data that has been processed and stored by the application
 			} else if (c == 's') {
 				for (String s : inputDataFiles) {
 					System.out.println("Filename: " + s + " Summary Information: " + summaryRetrieval(s));
 				}
+			//  API should allow a user to request data in chunks that meet the buffer standards
 			} else if (c == 'b'){
+                // TODO: Need to implement delivery via binary buffer
 
-
+            //  A user needs to be able to quit the application and break from the while true loop
 			} else if (c == 'q') {
 				return;
+            //  Handling the null case in the event the User does not have the best intentions.
 			} else {
 				System.out.println("You entered the character " + c + " which is not recognized by the system as {r, " +
 						"f, s, or q}.  Please select from this list and press enter.");
@@ -176,13 +192,7 @@ class Client
 
 	} // main
 
-	public static int sizeAnalysis(){
-		if (listOfMeasures.isEmpty()){
-			return 0;
-		} else {
-			return listOfMeasures.get(0).al.size();
-		}
-	}
+
 
 	private static void loadAllData(ArrayList<String> inputDataFiles){
 		for (String s: inputDataFiles){
