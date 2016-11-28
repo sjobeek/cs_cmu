@@ -21,7 +21,6 @@
  * Internal Methods: None
  *
  ******************************************************************************************************************/
-import com.sun.xml.internal.bind.v2.TODO;
 
 import java.io.*;
 import java.net.*;
@@ -72,7 +71,7 @@ class Client
     //  Structure to organize all of the Measurement objects
 	private static ArrayList<Measurements> listOfMeasures = new ArrayList<Measurements>();
 
-	public static void main(String args[]) throws Exception
+    public static void main(String args[]) throws Exception
 	{
 		int	portID;		// Server socket port
 
@@ -178,8 +177,33 @@ class Client
 				}
 			//  API should allow a user to request data in chunks that meet the buffer standards
 			} else if (c == 'b'){
-                // TODO: Need to implement delivery via binary buffer
+                //  Do you want all
+                System.out.println("Which measurements should be delivered? Press y to deliver all measurements \n");
+                System.out.println("Or enter the indices to not deliver one line at a time. Enter y when finished. \n");
 
+                String input = UserInput.next();
+                ArrayList<Integer> indices = new ArrayList<Integer>();
+                while (input.charAt(0) != 'y'){
+                    try {
+                        int newIndex = Integer.parseInt(input);
+                        indices.add(newIndex);
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+                    String out = "";
+                    for (Integer i: indices) {
+                        out += i.toString()+ " ";
+                    }
+                    System.out.println("Characters entered so far: " + out);
+                    input = UserInput.next();
+                }
+
+                int[] start_time = getTimeFromUser("start", UserInput);
+                int[] end_time = getTimeFromUser("end",  UserInput);
+
+				//Get size of the data to be sent
+                int numBytes = createByteArrayOutputStream(start_time, end_time, indices);
+                System.out.println("Number of bytes written was " + numBytes);
             //  A user needs to be able to quit the application and break from the while true loop
 			} else if (c == 'q') {
 				return;
@@ -192,9 +216,79 @@ class Client
 
 	} // main
 
+    private static int[] getTimeFromUser(String start_end, Scanner UserInput){
+        int[] start_time = new int[] {Integer.MAX_VALUE,Integer.MAX_VALUE, Integer.MAX_VALUE};
+        while (start_time[2] == Integer.MAX_VALUE){
+            System.out.println("What should the " + start_end + " time be.  Please enter in the format HH:MM:SS on one line\n");
+            String userInput = UserInput.next();
+            String[] tempTimeArray = userInput.split(":");
+            if (tempTimeArray.length == 3){
+                try{
+                    start_time[0] = Integer.parseInt(tempTimeArray[0]);
+                    start_time[1] = Integer.parseInt(tempTimeArray[1]);
+                    start_time[2] = Integer.parseInt(tempTimeArray[2]);
+                } catch (Exception e){
+                    start_time[2] = Integer.MAX_VALUE;
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println("Please enter the time in the format HH:MM:SS like 15:25:12\n");
+            }
+        }
+        return start_time;
+    }
+
+    private static int createByteArrayOutputStream(int[] startTime, int[] endTime, ArrayList<Integer> indices) {
+        int countedSoFar = 0, counter = 0;
+        ArrayList<Measurements> returnArr = new ArrayList<Measurements>();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        //  Start by finding the list of all elements with size up to 4096 that I can pack into first buffer
+        while (countedSoFar < 4096 && counter < listOfMeasures.size()){
+            int[] readingTime = new int[3];
+            readingTime[0] = Integer.parseInt(listOfMeasures.get(counter).readingTime.split(":")[0]);
+            readingTime[1] = Integer.parseInt(listOfMeasures.get(counter).readingTime.split(":")[1]);
+            readingTime[2] = Integer.parseInt(listOfMeasures.get(counter).readingTime.split(":")[2]);
 
 
-	private static void loadAllData(ArrayList<String> inputDataFiles){
+            for (int i = 0; i<listOfMeasures.get(counter).al.size(); i++){
+                if (startTime[0] < readingTime[0] ||
+                (startTime[0] == readingTime[0] && startTime[1] < readingTime[1] ) ||
+                (startTime[0] == readingTime[0] && startTime[1] == readingTime[1] &&  startTime[2] <= readingTime[2]) )
+                {
+                    if ((endTime[0] > readingTime[0]) ||
+                            (endTime[0] == readingTime[0] && endTime[1] > readingTime[1] ) ||
+                            (endTime[0] == readingTime[0] && endTime[1]==readingTime[1] && endTime[2] >= readingTime[2])
+                            )
+                    {
+                        if (indices.contains(i)){
+                            countedSoFar = countedSoFar + 4 + listOfMeasures.get(counter).al.get(i).description.getBytes().length;
+                        }
+                    }
+                }
+            }
+            //  Append to the list
+            if (countedSoFar < 4096){
+                returnArr.add(listOfMeasures.get(counter));
+            }
+            ++counter;
+
+        }
+
+        //  From that list add to the output byte stream
+        for (Measurements m: returnArr) {
+            try
+            {
+                out.write(m.toString().getBytes());
+            } catch (IOException ioe){
+                ioe.printStackTrace();
+            }
+        }
+        return out.size();
+    }
+
+
+    private static void loadAllData(ArrayList<String> inputDataFiles){
 		for (String s: inputDataFiles){
 			listOfMeasures.addAll(loadData(s));
 		}
@@ -272,23 +366,16 @@ class Client
 		DataInputStream inFromServer = new DataInputStream(clientSocket.getInputStream());
 		//BufferedReader d = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-		// Here we ask the user to press enter to begin data collection from the server...
-
-		System.out.println( "\n\nPress enter to begin data collection...\n" );
-		junk = UserInput.readLine();
-
 		// Send the start string to the server to begin collecting data...
 
 		outToServer.writeBytes(START);
-		//String minTimeStamp = "";
 		int minHours= Integer.MAX_VALUE, minMinutes = Integer.MAX_VALUE, minSeconds= Integer.MAX_VALUE;
-		//String maxTimeStamp = "";
 		int maxHours= Integer.MIN_VALUE, maxMinutes = Integer.MIN_VALUE, maxSeconds= Integer.MIN_VALUE;
 
-		// Data loop... I only collect 30 samples...
+		// Data loop
 		BufferedWriter bw = new BufferedWriter(
 				new OutputStreamWriter( new FileOutputStream("tempFileName1234124.txt"), "utf-8"));
-		for (int i=0; i<10; i++)
+		for (int i=0; i<300; i++)
 		{
 			// Here we read the data from the socket...
 			//System.out.println(d.readLine());
